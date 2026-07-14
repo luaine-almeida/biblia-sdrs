@@ -190,10 +190,25 @@
     font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:700;margin:0;
     line-height:1.3;
   }
-  .card .body{
-    color:var(--text-dim);font-size:13.5px;white-space:pre-line;
+  .card .body{display:flex;flex-direction:column;gap:6px;}
+  .para-row{
+    display:flex;align-items:flex-start;gap:8px;
+    padding:6px 8px 6px 0;
+    border-radius:6px;
   }
-  .card .body b{color:var(--text);font-weight:600;}
+  .para-row:hover{background:var(--card-hover);}
+  .para-text{
+    flex:1;color:var(--text-dim);font-size:13.5px;white-space:pre-line;
+  }
+  .para-text b{color:var(--text);font-weight:600;}
+  .para-copy{
+    flex:none;width:24px;height:24px;
+    display:flex;align-items:center;justify-content:center;
+    color:var(--text-faint);background:none;border:1px solid var(--border-strong);
+    border-radius:6px;cursor:pointer;margin-top:1px;
+  }
+  .para-copy:hover{color:var(--text);border-color:var(--text-dim);}
+  .para-copy.copied{color:var(--teal);border-color:var(--teal);}
   .card .note{
     font-size:12.5px;color:var(--amber);background:var(--amber-dim);
     border-radius:6px;padding:7px 9px;margin-top:2px;
@@ -206,6 +221,27 @@
   }
   .copy-btn:hover{color:var(--text);border-color:var(--text-dim);}
   .copy-btn.copied{color:var(--teal);border-color:var(--teal);}
+
+  /* links & resources list */
+  .link-list{display:flex;flex-direction:column;gap:4px;}
+  .link-row{
+    display:flex;align-items:center;justify-content:space-between;gap:8px;
+    padding:8px 9px;border-radius:6px;border:1px solid var(--border);
+    background:var(--panel);
+  }
+  .link-row a{
+    color:var(--blue);text-decoration:none;font-size:13.5px;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  }
+  .link-row a:hover{text-decoration:underline;}
+  .link-copy{
+    flex:none;width:24px;height:24px;
+    display:flex;align-items:center;justify-content:center;
+    color:var(--text-faint);background:none;border:1px solid var(--border-strong);
+    border-radius:6px;cursor:pointer;
+  }
+  .link-copy:hover{color:var(--text);border-color:var(--text-dim);}
+  .link-copy.copied{color:var(--teal);border-color:var(--teal);}
 
   /* tag color coding per category */
   .tag-abertura{background:#20344a;color:#7fb2e8;}
@@ -734,16 +770,30 @@ Closers híbridos: validar com a Vanessa`},
 text:`Beleza! Segue aqui as principais informações sobre os nossos bootcamps: https://linktr.ee/tripletenbrasil — qualquer dúvida, fico à disposição! Aguardamos você, até breve.`},
 
 // ===================== LINKS =====================
-{cat:'links', title:'Links institucionais', tags:'links site espanhol ingles mba credenciamento',
-text:`Site em espanhol: http://tripleten.mx/
-Site em inglês: http://tripleten.com/
-Linktree bootcamps: https://linktr.ee/tripletenbrasil
-Página MBA: https://wordpress.tripleten.com.br/mba/
-Apresentação MBA: https://tripleten.com/pt-bra/mba-career-consultation/
-Grade dos MBAs (baixar e enviar PDF): https://drive.google.com/drive/folders/1BUnZ_xl4Laxlrz-RqHS73cB_Oz89G0zc
-Credenciamento MEC: consultar link completo no Portal de Vendas
-Teste vocacional: https://tripleten.com/pt-bra/meet-quiz/
-Portal de Vendas (playbook completo): https://sites.google.com/tripleten.com/portal-salesteam`},
+{cat:'links', title:'Portal e playbook', tags:'links portal vendas playbook completo',
+links:[
+  {label:'Portal de Vendas (playbook completo)', url:'https://sites.google.com/tripleten.com/portal-salesteam'},
+]},
+
+{cat:'links', title:'Bootcamps', tags:'links bootcamps linktree teste vocacional',
+links:[
+  {label:'Linktree bootcamps', url:'https://linktr.ee/tripletenbrasil'},
+  {label:'Teste vocacional', url:'https://tripleten.com/pt-bra/meet-quiz/'},
+]},
+
+{cat:'links', title:'MBA', tags:'links mba pagina apresentacao grade credenciamento mec',
+links:[
+  {label:'Página MBA', url:'https://wordpress.tripleten.com.br/mba/'},
+  {label:'Apresentação MBA', url:'https://tripleten.com/pt-bra/mba-career-consultation/'},
+  {label:'Grade dos MBAs (pasta Drive — baixar e enviar PDF)', url:'https://drive.google.com/drive/folders/1BUnZ_xl4Laxlrz-RqHS73cB_Oz89G0zc'},
+  {label:'Credenciamento MEC (verificação)', url:'https://emec.mec.gov.br/emec/consulta-cadastro/detalhamento/d96957f455f6405d14c6542552b0f6eb/MjU2NTU=/93916316abe23148507bd4c260e4b878/MzE3NjI0'},
+]},
+
+{cat:'links', title:'Sites institucionais (outros idiomas)', tags:'links site espanhol ingles internacional',
+links:[
+  {label:'Site em espanhol', url:'http://tripleten.mx/'},
+  {label:'Site em inglês', url:'http://tripleten.com/'},
+]},
 
 ];
 
@@ -771,7 +821,8 @@ function matches(entry){
   const catOk = activeCat==='todos' || entry.cat===activeCat;
   if(!catOk) return false;
   if(!query) return true;
-  const hay = (entry.title+' '+entry.tags+' '+entry.text).toLowerCase();
+  const linksText = entry.links ? entry.links.map(l=>l.label+' '+l.url).join(' ') : (entry.text||'');
+  const hay = (entry.title+' '+entry.tags+' '+linksText).toLowerCase();
   return hay.includes(query.toLowerCase());
 }
 
@@ -779,11 +830,21 @@ function catLabel(id){
   return (CATS.find(c=>c.id===id)||{}).label || id;
 }
 
+const COPY_ICON = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+const CHECK_ICON = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>';
+
+function paragraphsOf(text){
+  return text.trim().split(/\n\s*\n/).map(p=>p.trim()).filter(p=>p.length>0);
+}
+
+let currentItems = [];
+
 function renderGrid(){
   const grid = document.getElementById('grid');
   const countNote = document.getElementById('countNote');
   grid.innerHTML = '';
   const items = ENTRIES.filter(matches);
+  currentItems = items;
   countNote.textContent = items.length + (items.length===1 ? ' resultado' : ' resultados');
   if(items.length===0){
     grid.innerHTML = '<div class="empty">Nada encontrado. Tenta outra palavra-chave ou muda a categoria.</div>';
@@ -793,37 +854,72 @@ function renderGrid(){
     const card = document.createElement('div');
     card.className = 'card';
     const noteHtml = entry.note ? `<div class="note">${escapeHtml(entry.note)}</div>` : '';
+
+    let bodyHtml, footerHtml;
+
+    if(entry.links){
+      bodyHtml = `<div class="link-list">` + entry.links.map((l,li) => `
+        <div class="link-row">
+          <a href="${escapeAttr(l.url)}" target="_blank" rel="noopener">${escapeHtml(l.label)}</a>
+          <button class="link-copy" data-entry="${i}" data-link="${li}" aria-label="Copiar link">${COPY_ICON}</button>
+        </div>
+      `).join('') + `</div>`;
+      footerHtml = '';
+    } else {
+      const paras = paragraphsOf(entry.text);
+      bodyHtml = `<div class="body">` + paras.map((p,pi) => `
+        <div class="para-row">
+          <div class="para-text">${escapeHtml(p)}</div>
+          <button class="para-copy" data-entry="${i}" data-para="${pi}" aria-label="Copiar parágrafo">${COPY_ICON}</button>
+        </div>
+      `).join('') + `</div>`;
+      footerHtml = '';
+    }
+
     card.innerHTML = `
       <div class="tagrow">
         <h3>${escapeHtml(entry.title)}</h3>
         <span class="cat-tag tag-${entry.cat}">${catLabel(entry.cat)}</span>
       </div>
-      <div class="body">${escapeHtml(entry.text)}</div>
+      ${bodyHtml}
       ${noteHtml}
-      <div class="footer-row">
-        <button class="copy-btn" data-idx="${i}">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-          Copiar
-        </button>
-      </div>
+      ${footerHtml}
     `;
-    const btn = card.querySelector('.copy-btn');
-    btn.onclick = ()=>{
-      navigator.clipboard.writeText(entry.text.trim()).then(()=>{
-        btn.classList.add('copied');
-        btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Copiado';
-        setTimeout(()=>{
-          btn.classList.remove('copied');
-          btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copiar';
-        }, 1600);
-      });
-    };
     grid.appendChild(card);
   });
 }
 
+// event delegation for all copy buttons (whole card, per-paragraph, per-link)
+document.getElementById('grid').addEventListener('click', (e)=>{
+  const btn = e.target.closest('.copy-btn, .para-copy, .link-copy');
+  if(!btn) return;
+  const entry = currentItems[Number(btn.dataset.entry)];
+  if(!entry) return;
+  let text;
+  if(btn.classList.contains('link-copy')){
+    text = entry.links[Number(btn.dataset.link)].url;
+  } else if(btn.classList.contains('para-copy')){
+    text = paragraphsOf(entry.text)[Number(btn.dataset.para)];
+  } else {
+    text = entry.text.trim();
+  }
+  navigator.clipboard.writeText(text).then(()=>{
+    const original = btn.innerHTML;
+    const isFull = btn.classList.contains('copy-btn');
+    btn.classList.add('copied');
+    btn.innerHTML = isFull ? (CHECK_ICON + ' Copiado') : CHECK_ICON;
+    setTimeout(()=>{
+      btn.classList.remove('copied');
+      btn.innerHTML = original;
+    }, 1400);
+  });
+});
+
 function escapeHtml(s){
   return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+function escapeAttr(s){
+  return escapeHtml(s).replace(/"/g,'&quot;');
 }
 
 document.getElementById('search').addEventListener('input', (e)=>{
