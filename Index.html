@@ -1,0 +1,1023 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Guia Rápido SDR — TripleTen</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap');
+
+  :root{
+    --bg:#12181f;
+    --panel:#182029;
+    --card:#1c2530;
+    --card-hover:#212c39;
+    --border:#2b3644;
+    --border-strong:#3a4756;
+    --text:#eef2f6;
+    --text-dim:#9aa7b5;
+    --text-faint:#6b7788;
+    --amber:#e8a33d;
+    --amber-dim:#4a3a1f;
+    --teal:#3fbf9f;
+    --teal-dim:#173a33;
+    --red:#e0605a;
+    --red-dim:#3d201e;
+    --blue:#5b9fe0;
+    --radius:10px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:'IBM Plex Sans', Arial, sans-serif;
+    font-size:15px;
+    line-height:1.55;
+    padding:0 0 60px;
+  }
+  .wrap{max-width:1120px;margin:0 auto;padding:0 24px;}
+
+  header{
+    padding:36px 24px 20px;
+    border-bottom:1px solid var(--border);
+    background:linear-gradient(180deg, #151c24 0%, #12181f 100%);
+  }
+  header .wrap{display:flex;flex-direction:column;gap:6px;}
+  .eyebrow{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px;
+    letter-spacing:.12em;
+    text-transform:uppercase;
+    color:var(--amber);
+  }
+  h1{
+    font-family:'Space Grotesk', sans-serif;
+    font-weight:700;
+    font-size:30px;
+    margin:2px 0 4px;
+    letter-spacing:-.01em;
+  }
+  header p.sub{color:var(--text-dim);margin:0 0 18px;font-size:14.5px;max-width:640px;}
+
+  .searchbar{
+    display:flex;align-items:center;gap:10px;
+    background:var(--panel);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    padding:10px 14px;
+    max-width:520px;
+  }
+  .searchbar svg{flex:none;opacity:.5;}
+  .searchbar input{
+    flex:1;background:none;border:none;outline:none;
+    color:var(--text);font-size:14.5px;font-family:inherit;
+  }
+  .searchbar input::placeholder{color:var(--text-faint);}
+  .searchbar .kbd{
+    font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text-faint);
+    border:1px solid var(--border-strong);border-radius:4px;padding:2px 6px;
+  }
+
+  /* Semaphore panel */
+  .semaphore{
+    margin:22px 0 0;
+    background:var(--panel);
+    border:1px solid var(--border);
+    border-radius:12px;
+    padding:18px 20px 20px;
+  }
+  .semaphore h2{
+    font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:700;
+    margin:0 0 3px;display:flex;align-items:center;gap:8px;
+  }
+  .semaphore h2 .dot{width:8px;height:8px;border-radius:50%;background:var(--amber);display:inline-block;}
+  .semaphore .desc{color:var(--text-dim);font-size:13px;margin:0 0 14px;}
+  .criteria{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:8px;margin-bottom:14px;}
+  .crit{
+    border:1px solid var(--border);
+    border-radius:8px;
+    padding:10px 12px;
+    display:flex;flex-direction:column;gap:8px;
+    background:var(--card);
+  }
+  .crit .label{font-size:13px;color:var(--text);}
+  .crit .toggles{display:flex;gap:6px;}
+  .crit button{
+    flex:1;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11px;
+    letter-spacing:.03em;
+    padding:6px 4px;
+    border-radius:6px;
+    border:1px solid var(--border-strong);
+    background:transparent;
+    color:var(--text-dim);
+    cursor:pointer;
+    transition:.12s;
+  }
+  .crit button:hover{border-color:var(--text-dim);}
+  .crit button.active-yes{background:var(--teal-dim);border-color:var(--teal);color:var(--teal);}
+  .crit button.active-no{background:var(--red-dim);border-color:var(--red);color:var(--red);}
+
+  .verdict{
+    border-radius:8px;padding:12px 14px;
+    display:flex;flex-direction:column;gap:6px;
+    font-size:13.5px;
+  }
+  .verdict .vline{display:flex;gap:8px;align-items:flex-start;}
+  .verdict .vline b{font-family:'Space Grotesk',sans-serif;}
+  .v-book{background:var(--teal-dim);border:1px solid var(--teal);}
+  .v-book b{color:var(--teal);}
+  .v-block{background:var(--red-dim);border:1px solid var(--red);}
+  .v-block b{color:var(--red);}
+  .v-neutral{background:#232c22;border:1px solid #6b8f4f;}
+  .v-neutral b{color:#9fce6f;}
+  .v-warn{background:var(--amber-dim);border:1px solid var(--amber);}
+  .v-warn b{color:var(--amber);}
+  .verdict-stack{display:flex;flex-direction:column;gap:8px;}
+  .reset-btn{
+    align-self:flex-start;margin-top:10px;
+    font-family:'IBM Plex Mono',monospace;font-size:11px;
+    color:var(--text-faint);background:none;border:1px solid var(--border-strong);
+    border-radius:6px;padding:5px 10px;cursor:pointer;
+  }
+  .reset-btn:hover{color:var(--text);border-color:var(--text-dim);}
+
+  /* category chips */
+  .chiprow{
+    display:flex;flex-wrap:wrap;gap:8px;
+    margin:22px 0 6px;
+  }
+  .chip{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:12px;
+    padding:7px 13px;
+    border-radius:20px;
+    border:1px solid var(--border);
+    color:var(--text-dim);
+    background:var(--panel);
+    cursor:pointer;
+    white-space:nowrap;
+    transition:.12s;
+  }
+  .chip:hover{border-color:var(--border-strong);color:var(--text);}
+  .chip.active{background:var(--amber);border-color:var(--amber);color:#2a1e08;font-weight:600;}
+
+  .count-note{color:var(--text-faint);font-size:12.5px;margin:14px 2px 2px;font-family:'IBM Plex Mono',monospace;}
+
+  /* cards */
+  .grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(320px,1fr));
+    gap:14px;
+    margin-top:14px;
+  }
+  .card{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    padding:16px 17px 14px;
+    display:flex;flex-direction:column;gap:8px;
+  }
+  .card:hover{border-color:var(--border-strong);}
+  .card .tagrow{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;}
+  .card .cat-tag{
+    font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;
+    padding:3px 8px;border-radius:4px;
+  }
+  .card h3{
+    font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:700;margin:0;
+    line-height:1.3;
+  }
+  .card .body{display:flex;flex-direction:column;gap:6px;}
+  .para-row{
+    display:flex;align-items:flex-start;gap:8px;
+    padding:6px 8px 6px 0;
+    border-radius:6px;
+  }
+  .para-row:hover{background:var(--card-hover);}
+  .para-text{
+    flex:1;color:var(--text-dim);font-size:13.5px;white-space:pre-line;
+  }
+  .para-text b{color:var(--text);font-weight:600;}
+  .para-copy{
+    flex:none;width:24px;height:24px;
+    display:flex;align-items:center;justify-content:center;
+    color:var(--text-faint);background:none;border:1px solid var(--border-strong);
+    border-radius:6px;cursor:pointer;margin-top:1px;
+  }
+  .para-copy:hover{color:var(--text);border-color:var(--text-dim);}
+  .para-copy.copied{color:var(--teal);border-color:var(--teal);}
+  .card .note{
+    font-size:12.5px;color:var(--amber);background:var(--amber-dim);
+    border-radius:6px;padding:7px 9px;margin-top:2px;
+  }
+  .card .footer-row{display:flex;justify-content:flex-end;margin-top:4px;}
+  .copy-btn{
+    font-family:'IBM Plex Mono',monospace;font-size:11.5px;
+    color:var(--text-dim);background:none;border:1px solid var(--border-strong);
+    border-radius:6px;padding:5px 10px;cursor:pointer;display:flex;align-items:center;gap:5px;
+  }
+  .copy-btn:hover{color:var(--text);border-color:var(--text-dim);}
+  .copy-btn.copied{color:var(--teal);border-color:var(--teal);}
+
+  /* links & resources list */
+  .link-list{display:flex;flex-direction:column;gap:4px;}
+  .link-row{
+    display:flex;align-items:center;justify-content:space-between;gap:8px;
+    padding:8px 9px;border-radius:6px;border:1px solid var(--border);
+    background:var(--panel);
+  }
+  .link-row a{
+    color:var(--blue);text-decoration:none;font-size:13.5px;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  }
+  .link-row a:hover{text-decoration:underline;}
+  .link-copy{
+    flex:none;width:24px;height:24px;
+    display:flex;align-items:center;justify-content:center;
+    color:var(--text-faint);background:none;border:1px solid var(--border-strong);
+    border-radius:6px;cursor:pointer;
+  }
+  .link-copy:hover{color:var(--text);border-color:var(--text-dim);}
+  .link-copy.copied{color:var(--teal);border-color:var(--teal);}
+
+  /* tag color coding per category */
+  .tag-abertura{background:#20344a;color:#7fb2e8;}
+  .tag-qualificacao{background:#2b2547;color:#b19ce8;}
+  .tag-agendamento{background:#173a33;color:#3fbf9f;}
+  .tag-confirmacao{background:#173a33;color:#3fbf9f;}
+  .tag-objecoes{background:#4a3a1f;color:#e8a33d;}
+  .tag-perda{background:#3d201e;color:#e0605a;}
+  .tag-followup{background:#2b2547;color:#b19ce8;}
+  .tag-tecnico{background:#3d201e;color:#e0605a;}
+  .tag-mba{background:#20344a;color:#7fb2e8;}
+  .tag-equipe{background:#232c22;color:#9fce6f;}
+  .tag-links{background:#232a33;color:#9aa7b5;}
+
+  footer{margin-top:36px;padding-top:18px;border-top:1px solid var(--border);color:var(--text-faint);font-size:12.5px;}
+  footer a{color:var(--blue);}
+
+  .empty{color:var(--text-faint);padding:30px 4px;font-size:14px;}
+
+  @media (max-width:640px){
+    h1{font-size:24px;}
+    .criteria{grid-template-columns:1fr 1fr;}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <span class="eyebrow">TripleTen · Time SDR</span>
+    <h1>Guia rápido de tratativa</h1>
+    <p class="sub">Consulta rápida por categoria e busca, com semáforo de agendamento ao vivo. Baseado na "bíblia" de scripts, reorganizado pra uso durante o atendimento.</p>
+    <div class="searchbar">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input id="search" type="text" placeholder="Buscar script, palavra-chave ou situação (ex: reclame aqui, sem pc, reagendar)...">
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="semaphore">
+    <h2><span class="dot"></span>Semáforo de agendamento</h2>
+    <p class="desc">Marque o que já souber sobre o lead. O painel mostra ao vivo se dá pra agendar, contornar objeção, nutrir ou encerrar.</p>
+    <div class="criteria" id="criteria"></div>
+    <div class="verdict-stack" id="verdict"></div>
+    <button class="reset-btn" onclick="resetCriteria()">Limpar seleção</button>
+  </div>
+
+  <div class="chiprow" id="chiprow"></div>
+  <div class="count-note" id="countNote"></div>
+  <div class="grid" id="grid"></div>
+
+  <footer>
+    Links úteis:
+    <a href="https://sites.google.com/tripleten.com/portal-salesteam" target="_blank" rel="noopener">Portal de Vendas</a> ·
+    <a href="https://linktr.ee/tripletenbrasil" target="_blank" rel="noopener">Linktree bootcamps</a> ·
+    <a href="https://wordpress.tripleten.com.br/mba/" target="_blank" rel="noopener">Página MBA</a> ·
+    <a href="https://tripleten.com/pt-bra/meet-quiz/" target="_blank" rel="noopener">Teste vocacional</a>
+    <br>Dúvidas ou sugestões de ajuste neste guia: levar à supervisão de SDRs.
+  </footer>
+</div>
+
+<script>
+const CATS = [
+  {id:'todos', label:'Todos'},
+  {id:'abertura', label:'Abertura'},
+  {id:'qualificacao', label:'Qualificação'},
+  {id:'agendamento', label:'Agendamento'},
+  {id:'confirmacao', label:'Confirmação & Reagendamento'},
+  {id:'objecoes', label:'Dúvidas & Objeções'},
+  {id:'perda', label:'Critérios de Lost'},
+  {id:'followup', label:'Follow-up & Reciclagem'},
+  {id:'tecnico', label:'Dificuldades Técnicas'},
+  {id:'mba', label:'MBA'},
+  {id:'equipe', label:'Equipe & Fluxo'},
+  {id:'links', label:'Links & Recursos'},
+];
+
+const ENTRIES = [
+
+// ===================== ABERTURA =====================
+{cat:'abertura', title:'Novo lead — mensagem 1', tags:'novolead abertura primeiro contato',
+text:`Vou te contar um pouco mais sobre o nosso programa, tá bem?
+
+Somos um bootcamp online de programação premiado e de alto nível dos Estados Unidos.
+
+O bootcamp é focado no desenvolvimento das habilidades mais procuradas pelo mercado e as aulas são práticas — os alunos trabalham em projetos reais para construir um portfólio.
+
+Oferecemos garantia de emprego: se você não conseguir uma vaga em até 6 meses após a conclusão do curso, devolvemos o valor investido.
+
+O programa completo de carreira inclui: simulações de entrevistas, revisão de currículo e LinkedIn, apoio para montar portfólio e direcionamento para candidaturas alinhadas ao seu perfil.
+
+Faz sentido pra você esse formato de programa, [nome do lead]?`},
+
+{cat:'abertura', title:'1º dia — lead novo (variante curta)', tags:'novo lead dia 1',
+text:`Oi! Aqui é {{1}} da TripleTen, bootcamp de programação americano, único no Brasil. Tudo bem contigo?
+
+Vi que você demonstrou interesse pelos nossos cursos na área de Tecnologia.
+
+Normalmente marcamos um bate-papo para entender um pouco mais do que você está buscando e também te explicar com exclusividade tudo sobre o mercado de TI.
+
+Qual horário ficaria confortável para você hoje?
+Se estiver disponível, podemos fazer agora 😊`},
+
+{cat:'abertura', title:'2º dia — sem resposta', tags:'dia 2 sem resposta reengajar',
+text:`Você ainda tem interesse em uma mudança em sua carreira? Fale com um de nossos consultores respondendo a esta mensagem. Estamos prontos para te ajudar no próximo passo!`},
+
+{cat:'abertura', title:'3º dia — sem resposta', tags:'dia 3 sem resposta reengajar',
+text:`Aqui é [nome do SDR] da TripleTen 😊 Vi que você tinha interesse nos cursos da área de TI. Queria entender melhor o seu momento agora e o que você está buscando em relação à área de tecnologia. Se fizer sentido, posso te ajudar a agendar uma conversa rápida pra te explicar melhor. Qual horário fica melhor pra você?`},
+
+{cat:'abertura', title:'Resposta "Não" (não faz sentido o formato)', tags:'nao objecao abertura',
+text:`Poxa, teria algum motivo que você gostaria de compartilhar?`,
+note:'Sempre puxar o motivo antes de encerrar — a resposta te diz se o caminho certo é objeção financeira, tempo, descrença no formato ou desinteresse real.'},
+
+{cat:'abertura', title:'Resposta "Sim" — apresentar cursos', tags:'sim cursos bootcamps apresentacao',
+text:`Show! Esses são os cursos que oferecemos:
+
+📊 Analista de Dados — 7 meses. Transforma dados em decisões: analisa números pra mostrar onde a empresa pode melhorar e otimizar resultados.
+
+🧠 Cientista de Dados — 9 meses. Vai além da análise: usa estatística e IA pra prever tendências, entender clientes e otimizar resultados.
+
+🔍 Analista de Qualidade (QA) — 5 meses. Testa tudo antes de lançar: garante que sites e apps funcionem bem e sem erros.
+
+💻 Desenvolvedor Web — 10 meses. Cria sites, sistemas e apps: transforma ideias em plataformas reais (lojas online, sistemas de agendamento etc.).
+
+🎓 MBA em Dados e IA — a partir de 9 meses. Para quem já tem graduação reconhecida pelo MEC.
+
+Algum deles te chama mais atenção, [nome do lead]?`,
+note:'PS: o bootcamp de Desenvolvedor Web é considerado full stack.'},
+
+{cat:'abertura', title:'Lead: "oi, tudo bem?" / "bom dia" / "posso agora"', tags:'saudacao generica trigger',
+text:`Então, vou te fazer algumas perguntinhas rápidas para eu poder te direcionar para o consultor da área e podermos te proporcionar um atendimento mais personalizado. Tá bem? 😊`},
+
+{cat:'abertura', title:'Lead já sabe qual bootcamp quer', tags:'ja sabe curso especifico',
+text:`Então, vou te fazer algumas perguntinhas rápidas para podermos personalizar o seu atendimento, tá bom? 😊`},
+
+{cat:'abertura', title:'Lead apresentou dúvidas na abertura', tags:'duvidas iniciais',
+text:`Para te ajudar de forma mais assertiva vou te fazer algumas perguntinhas rápidas para podermos personalizar o seu atendimento, tá bom? 😊`},
+
+{cat:'abertura', title:'Qualificação automática (resposta padrão do lead)', tags:'resposta automatica bot lead',
+text:`Somos um bootcamp americano online de programação! Você demonstrou interesse no nosso programa, certo?!
+
+Esses são os cursos que oferecemos com garantia de emprego: Analista de Dados, Cientista de Dados, Analista de QA e Desenvolvedor Web.
+
+Algum deles te chama mais atenção, [nome do lead]?
+Se não houver um específico ou se tiver dúvidas, não tem problema! 😊`},
+
+// ===================== QUALIFICAÇÃO =====================
+{cat:'qualificacao', title:'Transição — quali + opções de curso juntas', tags:'perguntas bloco completo',
+text:`Então, me conta um pouco sobre você..
+
+- Qual sua profissão hoje?
+- O que te motiva a buscar pela área da tecnologia?
+- Você tem alguma formação profissional? Se sim, qual?
+- Algum dos cursos te chamou mais atenção? (Dev Web, Analista de Dados, Cientista de Dados, QA ou MBA pra quem tem graduação)
+- Você tem alguma dúvida sobre o programa ou a área de TI?
+- Qual sua previsão de início, caso tudo se encaixe (metodologia, valores etc.)?
+- Você possui computador e acesso à internet para acompanhar as aulas?
+
+*Se preferir, pode responder por áudio!*`},
+
+{cat:'qualificacao', title:'Quali primeiro, cursos depois', tags:'perguntas bloco sem cursos',
+text:`Então, me conta um pouco sobre você..
+
+- Qual sua profissão hoje?
+- O que te motiva a buscar pela área da tecnologia?
+- Você tem alguma formação profissional? Se sim, qual?
+- Você tem alguma dúvida sobre o programa ou a área de TI?
+- Qual sua previsão de início, caso tudo se encaixe (metodologia, valores etc.)?
+- Você possui computador e acesso à internet para acompanhar as aulas?
+
+*Se preferir, pode responder por áudio!*`},
+
+{cat:'qualificacao', title:'Bloco reduzido (5 perguntas)', tags:'perguntas bloco curto',
+text:`Me conta um pouco sobre você..
+
+- Qual sua profissão hoje?
+- O que te motiva a buscar pela área da tecnologia?
+- Você tem alguma formação profissional? Se sim, qual?
+- Você tem alguma dúvida sobre o programa ou a área de TI?
+- Você possui computador e acesso à internet para acompanhar as aulas?
+- Qual sua previsão de início, caso tudo se encaixe?
+
+*Se preferir, pode responder por áudio!*`},
+
+{cat:'qualificacao', title:'Área de atuação', tags:'profissao atual pergunta individual',
+text:`Me conta, hoje você já atua com algo relacionado à tecnologia? Se não, qual sua profissão hoje?`},
+
+{cat:'qualificacao', title:'Motivação — transição de carreira', tags:'motivacao pergunta individual',
+text:`Você busca uma transição de carreira ou seria algo para agregar habilidades em sua profissão?
+
+Variante (transição p/ dados): E o que te motivou a escolher a área de dados para realizar sua transição de carreira?
+
+Variante (agregar habilidades): E o que te motivou a buscar habilidades em TI para agregar em sua profissão? Quais resultados você gostaria de alcançar?`},
+
+{cat:'qualificacao', title:'Formação', tags:'formacao autodidata pergunta individual',
+text:`Se já atua na área: Você já tem formação profissional, é autodidata ou busca pela sua primeira formação?
+
+Se busca outra área: Você já tem formação profissional ou busca pela sua primeira formação?`},
+
+{cat:'qualificacao', title:'Prioridade / previsão de início', tags:'previsao inicio prazo pergunta individual',
+text:`No momento atual, essa formação é uma prioridade para você? Qual sua previsão de início, caso tudo se encaixe?
+
+Variantes:
+"Tem alguma data específica ou prazo em mente pra dar início?"
+"E como está seu momento, seria uma prioridade atingir esse objetivo? Tem alguma data específica ou prazo em mente pra dar início ao curso?"`},
+
+{cat:'qualificacao', title:'Computador / notebook', tags:'equipamento pc notebook pergunta individual',
+text:`Para aproveitar ao máximo as aulas práticas do curso, é importante que você tenha um computador pessoal. Você tem?`,
+note:'Se responder que só tem tablet/iPad, usar o script de "Tem tablet ou iPad" em Critérios de Lost antes de decidir.'},
+
+{cat:'qualificacao', title:'Prompt ChatGPT/Gemini para organizar a qualificação', tags:'chatgpt gemini prompt automacao hubspot',
+text:`A partir de agora, tudo o que você me mandar será organizado nesta ordem. Coloque marcador de bolinha antes de cada item:
+
+Profissão Atual:
+Formação Profissional:
+Motivações:
+Curso de Interesse:
+Dúvidas:
+Prioridade/Previsão de Início:
+Equipamento para Estudos:`,
+note:'Fluxo: cole a resposta do lead no ChatGPT/Gemini PRO com esse prompt → copie o rascunho pronto → revise → cole como observação no HubSpot → FIXE a nota.'},
+
+// ===================== AGENDAMENTO =====================
+{cat:'agendamento', title:'Sobre a consultoria (padrão)', tags:'consultoria explicacao convite',
+text:`Costumamos fazer esse bate papo breve com um dos nossos consultores para entender um pouco mais o que você está buscando, te apresentar nossa escola, cursos, suporte da equipe, plataforma de estudos, garantia de emprego, perspectivas de vagas e média salarial em cada segmento, e sanar todas as suas dúvidas.
+
+Você vai receber todas as informações dos cursos, incluindo valores e formas de pagamento.`},
+
+{cat:'agendamento', title:'Convite consultoria (versão com bullets/emoji)', tags:'consultoria convite gratuita beneficios',
+text:`Oferecemos uma consultoria de carreira gratuita com um dos nossos especialistas, uma oportunidade para você descobrir, de forma prática, como começar na área de TI.
+
+A conversa é rápida, acontece pelo Google Meet, e nela você vai:
+🔹 Entender qual caminho dentro da TI mais combina com você
+🔹 Tirar dúvidas sobre os cursos e o mercado
+🔹 Ver na prática como funciona a nossa metodologia
+🔹 Receber os valores reais e exclusivos, apresentados apenas na consultoria
+🔹 Entender o retorno real que essa mudança pode trazer pra sua vida
+
+É a melhor forma de dar o primeiro passo na tecnologia com segurança e propósito.
+
+Temos as agendas das X, das X e das X disponíveis!`},
+
+{cat:'agendamento', title:'Oferecer horários / agora', tags:'horario agendar oferta slots',
+text:`Podemos combinar para às X, às X ou às X?
+Se estiver disponível, podemos agora viu.
+
+Alternativa: Qual o melhor horário para você?`},
+
+{cat:'agendamento', title:'Sala pelo Google Meet', tags:'google meet celular acesso plataforma',
+text:`Lembrando que costumamos fazer pelo Google Meet para tornar a experiência mais breve e dinâmica, e para você conhecer a nossa plataforma que os alunos usam para estudar.
+
+*Se preferir, você pode acessar pelo celular.`},
+
+{cat:'agendamento', title:'Fechamento de agendamento por WhatsApp', tags:'fechar agendamento link sala confirmar',
+text:`Fica combinado para às 13h de Brasília nessa sala: https://meet.google.com/kkh-qeoj-kyq
+Se conseguir, recomendo você entrar uns 3 minutinhos antes.
+E, qualquer dúvida, é só chamar!
+
+Variante: Então fica combinado para amanhã às 11h no horário de Brasília. Vou te enviar o link da sala alguns minutinhos antes aqui pelo WhatsApp. Qualquer dúvida, estou à disposição 😊`},
+
+{cat:'agendamento', title:'Template por telefone (ag. já combinado)', tags:'template telefone agendamento confirmado video',
+text:`[nome do lead], conforme combinado, a sua consultoria ficou agendada para o dia X, às X no horário de Brasília.
+
+Segue aqui um vídeo bem legal sobre a consultoria: https://www.youtube.com/watch?v=VpTDlbNGx5U
+
+Lembrando que quem participa da nossa consultoria tem condições exclusivas, não vai perder, hein?
+
+Qualquer dúvida, é só chamar!`},
+
+// ===================== CONFIRMAÇÃO / REAGENDAMENTO =====================
+{cat:'confirmacao', title:'Confirmação de presença (lead já agendado)', tags:'confirmar presenca antes da call',
+text:`Aqui é o/a [nome do SDR] da TripleTen! 😊 Você tem uma consultoria agendada para às X no horário de Brasília. Posso confirmar sua presença?`},
+
+{cat:'confirmacao', title:'Se confirmou — puxar qualificação', tags:'confirmou sim quali direcionamento',
+text:`Maravilha [nome do lead]! Para finalizarmos o agendamento, só preciso te fazer algumas perguntinhas rápidas para eu poder direcionar sua consultoria para o especialista da área e podermos te proporcionar um atendimento mais especializado. Tá bem? 😊`,
+note:'Segue para Qualificação.'},
+
+{cat:'confirmacao', title:'Reagendar — não compareceu', tags:'reagendar faltou nao compareceu imprevisto',
+text:`Aqui é [nome do sdr] da TripleTen! 😊 Tentamos contato com você, mas sem sucesso. Imagino que você teve algum imprevisto e não conseguiu participar da sua consultoria, certo? Não tem problema!
+
+Conseguimos remarcar para às X, às X ou às X no horário de Brasília? Qual o melhor horário para falarmos? Se estiver disponível, podemos agora viu.`},
+
+{cat:'confirmacao', title:'Reagendar — variante com contexto do consultor', tags:'reagendar variante consultor explicacao',
+text:`Aqui é o/a [nome do SDR] da TripleTen! 😊 Vi que não conseguiu falar com o seu consultor de carreira no dia e horário combinado, acontece!
+
+Ele ia te ajudar a entender seu momento, explicar como funciona o plano de transição de carreira da TripleTen e ver se faz sentido pra você agora.
+
+Conseguimos remarcar para às X, às X ou às X no horário de Brasília? Qual o melhor horário para falarmos? Se estiver disponível, podemos agora viu.`},
+
+// ===================== DÚVIDAS & OBJEÇÕES =====================
+{cat:'objecoes', title:'Previsão de início 6+ meses', tags:'previsao 6 meses objecao adiar',
+text:`Nossos cursos e metodologias estão em constante evolução para acompanhar as mudanças do mercado. Dentro de 6 meses, é bem provável que tenhamos alterações tanto nos valores quanto nos formatos atuais, ou até mudanças no próprio conteúdo e disponibilidade de alguns cursos.
+
+Se fizer sentido pra você, cogita iniciar antes, aproveitando as condições e estrutura atuais? Ou prefere mesmo retornar daqui a 6 meses?`},
+
+{cat:'objecoes', title:'Desempregado / sem renda', tags:'financeiro desempregado sem renda apoio',
+text:`Mesmo sem atividade remunerada, você está preparada financeiramente para investir na formação ou tem alguém que vai te apoiar nesse sentido? Pergunto, pois trabalhamos com planos de investimento.`},
+
+{cat:'objecoes', title:'Quanto pretende investir (BANT)', tags:'bant investimento valor pergunta',
+text:`Você já tem uma ideia de quanto está disposto a investir nessa nova carreira?`},
+
+{cat:'objecoes', title:'Pergunta sobre valores', tags:'valores preco quanto custa planos',
+text:`Trabalhamos com planos de investimento e oferecemos diversas formas de pagamento, então os valores podem variar bastante de acordo com o que ficar melhor pra você.
+
+Por isso, nossos consultores são responsáveis por passar todas as informações dos cursos e entender junto com você os melhores valores e condições de acordo com suas possibilidades.
+
+Daí só preciso te fazer algumas perguntinhas rápidas para eu poder te direcionar para o consultor da área. Tá bem? 😊`},
+
+{cat:'objecoes', title:'Já fez teste vocacional / só quer o teste', tags:'teste vocacional quiz',
+text:`Além do teste vocacional, oferecemos essa consultoria de carreira breve e gratuita com um especialista em TI para entender melhor o que você busca, apresentar nossa escola, cursos, suporte, plataforma, perspectivas de emprego e média salarial, e sanar todas as suas dúvidas.
+
+Nossos consultores são especialistas e conseguem te auxiliar na escolha do melhor caminho de acordo com seus objetivos.
+
+Daí, só preciso te fazer algumas perguntinhas rápidas para poder te direcionar. Tá bem? 😊`},
+
+{cat:'objecoes', title:'Insiste em só fazer o teste vocacional', tags:'teste vocacional insistencia link',
+text:`Costumamos realizar essa consultoria de carreira gratuita com um especialista para entender melhor o que você busca e sanar suas dúvidas.
+
+Segue o link do teste vocacional: https://tripleten.com/pt-bra/meet-quiz/
+
+Ao finalizar, sendo do seu interesse, fique à vontade para me chamar aqui no Whats para agendarmos sua consultoria de carreira 😊`},
+
+{cat:'objecoes', title:'Precisa ter experiência prévia?', tags:'experiencia previa zero conhecimento',
+text:`Todos os nossos bootcamps iniciam com o conteúdo do zero, não sendo necessário ter conhecimentos ou habilidades prévias. Daremos todo suporte que precisar ao longo do curso até conseguir seu primeiro emprego na área, com a nossa garantia de emprego!
+
+Nossos consultores são especialistas e vão te ajudar a escolher o melhor caminho de acordo com seu perfil.
+
+Daí, só preciso te fazer algumas perguntinhas rápidas. Tá bem?`},
+
+{cat:'objecoes', title:'Já atua na área de TI', tags:'ja atua profissional area upgrade salario',
+text:`Temos vários alunos que já atuam na área e optam por fazer um bootcamp conosco para conseguir vagas fora do país ou atualizar conhecimentos e habilidades e alcançar salários mais altos.
+
+Costumamos fazer esse bate papo breve com um consultor em TI para entender melhor o que você busca, alinhar expectativas, apresentar a escola, cursos, suporte, garantia de emprego e sanar dúvidas.
+
+Daí, só preciso te fazer algumas perguntinhas rápidas. Tá bem? 😊`},
+
+{cat:'objecoes', title:'Não quer consultoria de jeito nenhum', tags:'recusa consultoria nao quer falar resistencia',
+text:`[nome do lead], nós somos um bootcamp americano de alto padrão em tecnologia trazendo essa metodologia agora pro Brasil.
+
+Trabalhamos com turmas limitadas para garantir a melhor experiência e suporte completo aos alunos.
+
+Oferecemos garantia de emprego: se você não conseguir uma vaga em até 6 meses após a conclusão, devolvemos o valor investido.
+
+Por isso a importância desse bate papo inicial — onde alinhamos expectativas e entendemos se o que entregamos está de acordo com seus objetivos, apresentamos o bootcamp e sanamos suas dúvidas.
+
+Esse é o nosso formato de ingresso. Sendo do seu interesse, fico à disposição para combinarmos em um momento que fique confortável pra você 💙`},
+
+{cat:'objecoes', title:'Certificado — é reconhecido?', tags:'certificado internacional reconhecimento',
+text:`Nossa certificação é internacional. Emitida pela TripleTen USA e reconhecida no mundo inteiro! Você será certificado como Desenvolvedor Full Stack (ou Analista de QA, Cientista de Dados etc., conforme o curso).`},
+
+{cat:'objecoes', title:'A garantia de emprego funciona mesmo?', tags:'garantia emprego funciona estatistica prova',
+text:`Cerca de 87% a 93% dos nossos alunos formados conseguiram um emprego na área em até 6 meses após a conclusão do bootcamp. A garantia consta em contrato. Também depende da dedicação do aluno ao longo do curso para atingir os requisitos das vagas. Temos casos de alunos que ingressaram no mercado antes mesmo de finalizar o curso.
+
+Costumamos fazer esse bate papo breve com um consultor para te apresentar tudo isso com mais detalhe.
+
+Daí, só preciso te fazer algumas perguntinhas rápidas. Tá bem? 😊`},
+
+{cat:'objecoes', title:'Lead menciona Reclame Aqui', tags:'reclame aqui reputacao reclamacoes desconfianca',
+text:`[nome do lead], eu entendo sua preocupação, e é muito válido pesquisar antes de decidir.
+
+O Reclame Aqui é um espaço livre para todos expressarem sua opinião, e entre mais de 3.000 alunos formados, infelizmente alguns não ficaram totalmente satisfeitos.
+
+O ponto mais importante não são as reclamações em si, mas como lidamos com cada uma delas — cada caso é tratado individualmente, com cuidado e transparência. Por isso, nossa reputação no Reclame Aqui está classificada como "ótima"!
+
+Além disso, você terá 15 dias para experimentar. Se perceber que o curso não atende suas expectativas, pode cancelar e recebe o reembolso total.
+
+Estou à disposição para agendarmos uma conversa com um dos nossos consultores quando for conveniente pra você.`},
+
+{cat:'objecoes', title:'Horário de atendimento', tags:'horario funcionamento atendimento',
+text:`Nosso atendimento é no horário de Brasília, de segunda a sexta, das 7h30 às 20h30. Aos sábados, das 9h30 às 17h.`},
+
+// ===================== CRITÉRIOS DE LOST =====================
+{cat:'perda', title:'Não tem computador', tags:'sem pc lost encerramento notebook',
+text:`Infelizmente, não será possível ingressar na TripleTen agora, pois é necessário ter um computador para acompanhar as aulas práticas. Futuramente, sendo do seu interesse, retorna o contato com a gente pra dar continuidade! Será um prazer tê-lo como aluno 😊
+
+Segue aqui as principais informações sobre os nossos bootcamps: https://linktr.ee/tripletenbrasil — qualquer dúvida, fico à disposição! Aguardamos você, até breve.`},
+
+{cat:'perda', title:'Diz que tem tablet ou iPad', tags:'tablet ipad nao serve equipamento',
+text:`Para acompanhar as aulas e realizar os projetos do bootcamp, é necessário ter acesso a um notebook ou computador, pois as atividades envolvem instalação de ferramentas e desenvolvimento de código que não são compatíveis com iPad ou tablet.
+
+Você teria acesso a algum notebook para estudar durante o curso?`},
+
+{cat:'perda', title:'Especificações mínimas de hardware', tags:'especificacoes tecnicas processador ram configuracao',
+text:`Processador: Intel Core i5 (8ª geração+) ou AMD Ryzen 3 (série 5000+), 4 núcleos / 8 threads
+Memória RAM: pelo menos 12 GB (recomendado 16 GB DDR4) — fuja de 8 GB
+Armazenamento: qualquer SSD de 128 GB+ (SATA ou NVMe) — não usar HD comum
+Tela: resolução Full HD (1080p / 1920x1080), essencial para multitarefa`},
+
+{cat:'perda', title:'Menor de idade', tags:'idade menor 18 anos requisito',
+text:`Por requisitos do programa, precisamos confirmar se você tem mais de 18 anos. Qual sua idade?`},
+
+{cat:'perda', title:'Menor de idade — encerramento', tags:'idade lost encerramento maioridade',
+text:`Por questão de requisitos do programa, é necessário ter mais de 18 anos. Infelizmente não será possível ingressar na TripleTen agora. Assim que atingir a maioridade, entra em contato com a gente pra dar continuidade! Será um prazer tê-lo como aluno 😊
+
+Segue aqui as principais informações sobre os nossos bootcamps: https://linktr.ee/tripletenbrasil — qualquer dúvida, fico à disposição! Aguardamos você, até breve.`},
+
+// ===================== FOLLOW-UP / RECICLAGEM =====================
+{cat:'followup', title:'4º dia ou reciclagem — bolsas exclusivas', tags:'dia 4 reciclagem bolsa desconto',
+text:`Tenho uma notícia muito boa pra te dar! Liberamos algumas vagas com bolsas exclusivas 🔥 Como você demonstrou interesse anteriormente, achei justo te avisar primeiro. Qual o melhor horário para falarmos hoje? Se estiver disponível, podemos agora viu.`},
+
+{cat:'followup', title:'Reciclagem — já recebeu msg sobre bolsa de 50%', tags:'bolsa 50% ja recebeu prioridade',
+text:`Vi que você recebeu a nossa mensagem sobre as bolsas de 50%, mas preferi te chamar pessoalmente para saber se você chegou a ver. Como você já tinha demonstrado interesse, achei justo te dar prioridade antes de passarmos a vaga para outra pessoa. Consegue uns minutinhos hoje para eu te dizer como funciona? Se estiver disponível, podemos agora viu!`},
+
+{cat:'followup', title:'Reciclagem 2º dia — Teste A (urgência de vagas)', tags:'reciclagem teste a urgencia vagas terminando',
+text:`Passando aqui pra te avisar que as bolsas com condições especiais estão terminando 🔥 E tudo indica que essa seja a última oportunidade nesse formato. Ainda temos algumas vagas disponíveis e queria entender: você ainda pensa em dar esse próximo passo na sua carreira?`,
+note:'Teste A/B: ambos usam gatilho de urgência com timing levemente diferente. Usar A ou B conforme o teste ativo indicado pela supervisão — vale confirmar com ela qual variante está rodando no momento.'},
+
+{cat:'followup', title:'Reciclagem 2º dia — Teste B (prazo estendido)', tags:'reciclagem teste b prazo estendido',
+text:`Passando aqui rapidinho porque conseguimos estender as condições especiais até amanhã 🚀 E como essa vai ser a última semana nesse formato, quis te chamar antes de encerrar. Me conta: você ainda pensa em fazer esse movimento na sua carreira?`},
+
+{cat:'followup', title:'FUP — contato estabelecido sem retorno', tags:'fup sem retorno silencio',
+text:`Como você está? Fiquei aguardando seu retorno para darmos continuidade ao seu atendimento sobre a área tech 😊
+
+Você ainda tem interesse em conhecer mais sobre as possibilidades desse mercado?
+
+Qual o melhor horário para falarmos? Pode ser às 15h30, às 16h ou às 17h30 no horário de Brasília?`},
+
+{cat:'followup', title:'FUP — sem retorno, já com data/horário combinados', tags:'fup horario ja combinado sem retorno',
+text:`Fiquei aguardando seu retorno para finalizarmos o agendamento da sua consultoria de carreira na área tech 😊
+
+Você gostaria de manter para às X? Qual o melhor horário para falarmos a respeito?`},
+
+{cat:'followup', title:'FUP — template Hilos', tags:'fup hilos template sumiu',
+text:`Você tinha interesse em mudar de carreira com a gente e sumiu por aqui 👀
+
+Só queria entender: você ainda quer entrar na área de tecnologia ou decidiu adiar esse plano?
+
+Estou aqui só pra garantir que você não perca a chance de conversar com um dos nossos especialistas — é uma conversa de 30 a 40 minutos só pra você entender se o bootcamp faz sentido pro seu momento.
+
+Bora destravar essa virada? Posso te ajudar a agendar no melhor horário para você 😉`},
+
+// ===================== DIFICULDADES TÉCNICAS =====================
+{cat:'tecnico', title:'Consultor não compareceu (1ª vez)', tags:'consultor faltou instabilidade sistema desculpas',
+text:`Nós estamos passando por uma instabilidade na conexão com o sistema e, por isso, o nosso consultor não conseguiu lhe encontrar na consultoria ou lhe dar um retorno antes. Peço sinceras desculpas por isso, não é a experiência que buscamos entregar 🙏
+
+Conseguimos remarcar para às X ou amanhã no mesmo horário, às X? Funciona pra você?`},
+
+{cat:'tecnico', title:'Consultor não compareceu (dias seguidos)', tags:'consultor instabilidade dias seguidos desculpas',
+text:`Nós passamos por uma instabilidade na conexão com o sistema nos últimos dias e, por isso, o nosso consultor não conseguiu lhe encontrar na consultoria ou lhe dar um retorno antes. Peço sinceras desculpas 🙏
+
+Conseguimos remarcar para às X ou no mesmo horário, às X? Funciona pra você?`},
+
+{cat:'tecnico', title:'WhatsApp — mensagem do lead não respondida por nós', tags:'whatsapp sem resposta atraso desculpas',
+text:`Tentei contato com você por telefone, mas sem sucesso. Nós passamos por uma instabilidade na conexão com o WhatsApp nos últimos dias e não consegui dar um retorno antes. Peço sinceras desculpas por isso 🙏
+
+Qual o melhor horário para falarmos? Pode ser às X, às X ou às X? Se estiver disponível, podemos agora viu.`},
+
+// ===================== MBA =====================
+{cat:'mba', title:'Requisitos do MBA', tags:'mba requisitos graduacao mec tecnologo',
+text:`Apenas quem tem superior completo (graduação ou tecnólogo, de qualquer área) pode fazer o MBA — não precisa ser voltada para TI.
+
+A graduação precisa ser reconhecida pelo MEC.
+
+Quando o aluno disser que faz tecnólogo, perguntar se é tecnólogo de ensino médio ou curso técnico de graduação. O tecnólogo de ensino médio não permite MBA, pois não tem validade de graduação.`,
+note:'Se o lead não tem superior completo: oferecer os bootcamps como alternativa, que não exigem graduação.'},
+
+{cat:'mba', title:'Abertura MBA — via RA', tags:'mba abertura ra desafio carreira',
+text:`Aqui é o/a [nome do SDR] do time de MBA da TripleTen. Vi que você demonstrou interesse no programa e queria entender com você: qual é o maior desafio da sua carreira hoje? Sua resposta me ajuda a te direcionar melhor!`},
+
+{cat:'mba', title:'Qualificação MBA', tags:'mba perguntas quali carreira',
+text:`Me conta um pouco sobre você..
+
+- O que você faz atualmente? Qual sua formação?
+- Qual é o maior desafio da sua carreira hoje?
+- O que te motivou a buscar um MBA nesse momento?
+- Quais resultados ou mudanças você espera alcançar com o MBA?
+- Tem alguma data específica ou prazo em mente pra dar início?
+
+*Se preferir, pode responder por áudio!*`},
+
+{cat:'mba', title:'Apresentação dos 3 MBAs', tags:'mba opcoes cursos ciencia dados analise ia',
+text:`MBA Ciência de Dados — 10 meses. Foco técnico e analítico: modelagem de dados, machine learning, programação, automação e soluções inteligentes.
+
+MBA Análise de Dados — 9 meses. Foco em análise estratégica de dados para negócios: dashboards, BI, métricas e uso de IA para tomada de decisão.
+
+MBA IA Aplicada para Negócios — 10 meses. Foco executivo e estratégico: aplicar IA em processos, vendas, marketing, operações e inovação.
+
+Algum deles te chama mais atenção, [nome do lead]?`},
+
+{cat:'mba', title:'Detalhe — MBA Ciência de Dados', tags:'mba ciencia dados detalhe',
+text:`Nosso MBA é 100% online, prático e reconhecido pelo MEC 🚀 São 10 meses de formação, com aulas ao vivo semanais (gravadas) e flexibilidade pra estudar no seu ritmo.
+
+Além da parte técnica em IA, você recebe suporte de carreira completo: revisão de currículo, LinkedIn, simulações de entrevista e apoio para portfólio. Também tem certificações extras, como AWS e bootcamp internacional da Arizona State University.
+
+O foco aqui não é só usar ferramentas prontas, mas entender como a IA funciona na prática. Faz sentido pra você?`},
+
+{cat:'mba', title:'Detalhe — MBA Análise de Dados', tags:'mba analise dados detalhe',
+text:`É uma pós-graduação reconhecida pelo MEC, 100% online, voltada para quem quer usar dados, IA e automação de forma estratégica no mercado.
+
+Ao longo de 9 meses, você desenvolve projetos práticos reais para montar portfólio, trabalhando com SQL, Python, BI, automações e aplicações de IA, incluindo LLMs e integrações com APIs.
+
+Além da parte técnica, você conta com mentoria próxima e apoio de carreira para posicionamento profissional. O foco não é só aprender ferramentas, mas entender como implementar IA de verdade no contexto corporativo.
+
+Você se vê atuando nessa camada mais estratégica com IA?`},
+
+{cat:'mba', title:'Sobre a consultoria MBA', tags:'mba consultoria convite agendamento',
+text:`Para darmos continuidade, costumamos agendar uma sessão de consultoria estratégica. Nesse bate-papo, apresentamos a estrutura acadêmica, a experiência na plataforma e as métricas de sucesso do programa, além dos planos de investimento reservados para os candidatos selecionados desta turma.
+
+Fazemos pelo Google Meet, para tornar a experiência mais breve e dinâmica.
+
+Temos as agendas X, X e X disponíveis! Qual o melhor horário para você?`},
+
+{cat:'mba', title:'Revalidação de diploma (graduação no exterior)', tags:'mba revalidacao diploma exterior estrangeiro',
+text:`Para cursar o MBA com certificação do MEC, é necessário ter uma graduação concluída no Brasil ou o diploma de graduação obtido no exterior devidamente revalidado aqui no país.
+
+Entendemos que esse processo pode gerar dúvidas ou parecer burocrático, mas, caso tenha interesse em iniciar a revalidação no Brasil, conseguimos considerar essa possibilidade e te orientar nos próximos passos.`},
+
+{cat:'mba', title:'Reciclagem MBA — bolsas exclusivas', tags:'mba reciclagem bolsa condicoes especiais',
+text:`Passando para te avisar que abrimos algumas vagas com condições especiais e bolsas exclusivas para os MBAs da TripleTen. Como você já havia demonstrado interesse anteriormente, quis te avisar em primeira mão para não perder a oportunidade. Você ainda está considerando iniciar sua especialização? Se sim, qual horário funciona melhor para falarmos hoje?`},
+
+// ===================== EQUIPE & FLUXO =====================
+{cat:'equipe', title:'Closers que atendem por prioridade', tags:'closers equipe supervisao prioridade',
+text:`Supervisora: Natalia Martins
+
+Closers:
+- Veronica (prioridade 1)
+- Lucas Bonow (prioridade 2)
+
+Supervisores: Ana, Beto
+
+Closers híbridos: validar com a Vanessa`},
+
+{cat:'equipe', title:'Lead frio / sem interesse — encerramento padrão', tags:'lost generico envio informacoes',
+text:`Beleza! Segue aqui as principais informações sobre os nossos bootcamps: https://linktr.ee/tripletenbrasil — qualquer dúvida, fico à disposição! Aguardamos você, até breve.`},
+
+// ===================== LINKS =====================
+{cat:'links', title:'Portal e playbook', tags:'links portal vendas playbook completo',
+links:[
+  {label:'Portal de Vendas (playbook completo)', url:'https://sites.google.com/tripleten.com/portal-salesteam'},
+]},
+
+{cat:'links', title:'Bootcamps', tags:'links bootcamps linktree teste vocacional',
+links:[
+  {label:'Linktree bootcamps', url:'https://linktr.ee/tripletenbrasil'},
+  {label:'Teste vocacional', url:'https://tripleten.com/pt-bra/meet-quiz/'},
+]},
+
+{cat:'links', title:'MBA', tags:'links mba pagina apresentacao grade credenciamento mec',
+links:[
+  {label:'Página MBA', url:'https://wordpress.tripleten.com.br/mba/'},
+  {label:'Apresentação MBA', url:'https://tripleten.com/pt-bra/mba-career-consultation/'},
+  {label:'Grade dos MBAs (pasta Drive — baixar e enviar PDF)', url:'https://drive.google.com/drive/folders/1BUnZ_xl4Laxlrz-RqHS73cB_Oz89G0zc'},
+  {label:'Credenciamento MEC (verificação)', url:'https://emec.mec.gov.br/emec/consulta-cadastro/detalhamento/d96957f455f6405d14c6542552b0f6eb/MjU2NTU=/93916316abe23148507bd4c260e4b878/MzE3NjI0'},
+]},
+
+{cat:'links', title:'Sites institucionais (outros idiomas)', tags:'links site espanhol ingles internacional',
+links:[
+  {label:'Site em espanhol', url:'http://tripleten.mx/'},
+  {label:'Site em inglês', url:'http://tripleten.com/'},
+]},
+
+];
+
+// ---------- render categories ----------
+const chiprow = document.getElementById('chiprow');
+let activeCat = 'todos';
+let query = '';
+
+CATS.forEach(c=>{
+  const btn = document.createElement('button');
+  btn.className = 'chip' + (c.id==='todos' ? ' active' : '');
+  btn.textContent = c.label;
+  btn.dataset.cat = c.id;
+  btn.onclick = ()=>{ activeCat = c.id; renderChips(); renderGrid(); };
+  chiprow.appendChild(btn);
+});
+
+function renderChips(){
+  [...chiprow.children].forEach(b=>{
+    b.classList.toggle('active', b.dataset.cat===activeCat);
+  });
+}
+
+function matches(entry){
+  const catOk = activeCat==='todos' || entry.cat===activeCat;
+  if(!catOk) return false;
+  if(!query) return true;
+  const linksText = entry.links ? entry.links.map(l=>l.label+' '+l.url).join(' ') : (entry.text||'');
+  const hay = (entry.title+' '+entry.tags+' '+linksText).toLowerCase();
+  return hay.includes(query.toLowerCase());
+}
+
+function catLabel(id){
+  return (CATS.find(c=>c.id===id)||{}).label || id;
+}
+
+const COPY_ICON = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+const CHECK_ICON = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>';
+
+function paragraphsOf(text){
+  return text.trim().split(/\n\s*\n/).map(p=>p.trim()).filter(p=>p.length>0);
+}
+
+let currentItems = [];
+
+function renderGrid(){
+  const grid = document.getElementById('grid');
+  const countNote = document.getElementById('countNote');
+  grid.innerHTML = '';
+  const items = ENTRIES.filter(matches);
+  currentItems = items;
+  countNote.textContent = items.length + (items.length===1 ? ' resultado' : ' resultados');
+  if(items.length===0){
+    grid.innerHTML = '<div class="empty">Nada encontrado. Tenta outra palavra-chave ou muda a categoria.</div>';
+    return;
+  }
+  items.forEach((entry,i)=>{
+    const card = document.createElement('div');
+    card.className = 'card';
+    const noteHtml = entry.note ? `<div class="note">${escapeHtml(entry.note)}</div>` : '';
+
+    let bodyHtml, footerHtml;
+
+    if(entry.links){
+      bodyHtml = `<div class="link-list">` + entry.links.map((l,li) => `
+        <div class="link-row">
+          <a href="${escapeAttr(l.url)}" target="_blank" rel="noopener">${escapeHtml(l.label)}</a>
+          <button class="link-copy" data-entry="${i}" data-link="${li}" aria-label="Copiar link">${COPY_ICON}</button>
+        </div>
+      `).join('') + `</div>`;
+      footerHtml = '';
+    } else {
+      const paras = paragraphsOf(entry.text);
+      bodyHtml = `<div class="body">` + paras.map((p,pi) => `
+        <div class="para-row">
+          <div class="para-text">${escapeHtml(p)}</div>
+          <button class="para-copy" data-entry="${i}" data-para="${pi}" aria-label="Copiar parágrafo">${COPY_ICON}</button>
+        </div>
+      `).join('') + `</div>`;
+      footerHtml = '';
+    }
+
+    card.innerHTML = `
+      <div class="tagrow">
+        <h3>${escapeHtml(entry.title)}</h3>
+        <span class="cat-tag tag-${entry.cat}">${catLabel(entry.cat)}</span>
+      </div>
+      ${bodyHtml}
+      ${noteHtml}
+      ${footerHtml}
+    `;
+    grid.appendChild(card);
+  });
+}
+
+// event delegation for all copy buttons (whole card, per-paragraph, per-link)
+document.getElementById('grid').addEventListener('click', (e)=>{
+  const btn = e.target.closest('.copy-btn, .para-copy, .link-copy');
+  if(!btn) return;
+  const entry = currentItems[Number(btn.dataset.entry)];
+  if(!entry) return;
+  let text;
+  if(btn.classList.contains('link-copy')){
+    text = entry.links[Number(btn.dataset.link)].url;
+  } else if(btn.classList.contains('para-copy')){
+    text = paragraphsOf(entry.text)[Number(btn.dataset.para)];
+  } else {
+    text = entry.text.trim();
+  }
+  navigator.clipboard.writeText(text).then(()=>{
+    const original = btn.innerHTML;
+    const isFull = btn.classList.contains('copy-btn');
+    btn.classList.add('copied');
+    btn.innerHTML = isFull ? (CHECK_ICON + ' Copiado') : CHECK_ICON;
+    setTimeout(()=>{
+      btn.classList.remove('copied');
+      btn.innerHTML = original;
+    }, 1400);
+  });
+});
+
+function escapeHtml(s){
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+function escapeAttr(s){
+  return escapeHtml(s).replace(/"/g,'&quot;');
+}
+
+document.getElementById('search').addEventListener('input', (e)=>{
+  query = e.target.value;
+  renderGrid();
+});
+
+// ---------- semaphore ----------
+const CRITERIA = [
+  {key:'pc', label:'Tem computador (não só tablet/celular)'},
+  {key:'previsao', label:'Previsão de início menor que 6 meses'},
+  {key:'area', label:'Busca pela área de tecnologia'},
+  {key:'porque', label:'Sabe por que está buscando isso (motivação clara)'},
+  {key:'renda', label:'Tem renda ou apoio financeiro'},
+  {key:'idade', label:'Tem 18 anos ou mais'},
+];
+let state = {};
+
+const critWrap = document.getElementById('criteria');
+CRITERIA.forEach(c=>{
+  const div = document.createElement('div');
+  div.className = 'crit';
+  div.innerHTML = `
+    <div class="label">${c.label}</div>
+    <div class="toggles">
+      <button data-key="${c.key}" data-val="yes">SIM</button>
+      <button data-key="${c.key}" data-val="no">NÃO</button>
+    </div>
+  `;
+  critWrap.appendChild(div);
+});
+
+critWrap.addEventListener('click', (e)=>{
+  const btn = e.target.closest('button');
+  if(!btn) return;
+  const key = btn.dataset.key, val = btn.dataset.val;
+  state[key] = (state[key]===val) ? undefined : val;
+  renderCriteria();
+  renderVerdict();
+});
+
+function renderCriteria(){
+  [...critWrap.querySelectorAll('button')].forEach(b=>{
+    b.classList.remove('active-yes','active-no');
+    if(state[b.dataset.key]===b.dataset.val){
+      b.classList.add(b.dataset.val==='yes' ? 'active-yes' : 'active-no');
+    }
+  });
+}
+
+function resetCriteria(){
+  state = {};
+  renderCriteria();
+  renderVerdict();
+}
+
+function renderVerdict(){
+  const el = document.getElementById('verdict');
+  el.innerHTML = '';
+  const lines = [];
+
+  if(state.pc==='no'){
+    lines.push({cls:'v-block', title:'Encerrar — sem computador', desc:'Usar script de Lost em Critérios de Lost → "Não tem computador". Confirmar antes se não é caso de tablet/iPad (script específico).'});
+  }
+  if(state.idade==='no'){
+    lines.push({cls:'v-block', title:'Encerrar — menor de idade', desc:'Usar script de Lost em Critérios de Lost → "Menor de idade".'});
+  }
+  if(state.previsao==='no'){
+    lines.push({cls:'v-warn', title:'Contornar objeção — previsão 6+ meses', desc:'Usar script em Dúvidas & Objeções → "Previsão de início 6+ meses" antes de seguir para o agendamento.'});
+  }
+  if(state.area==='no' || state.porque==='no'){
+    lines.push({cls:'v-neutral', title:'Nutrir, ainda não agendar', desc:'Lead busca outra área ou não tem clareza do motivo. Melhor seguir com conteúdo de nutrição em vez de forçar o agendamento agora.'});
+  }
+  if(state.renda==='no'){
+    lines.push({cls:'v-warn', title:'Validar situação financeira', desc:'Usar script em Dúvidas & Objeções → "Desempregado / sem renda" antes de prosseguir com o agendamento.'});
+  }
+
+  const allAnswered = CRITERIA.every(c=>state[c.key]);
+  const allGood = CRITERIA.every(c=>state[c.key]==='yes');
+
+  if(allGood){
+    lines.unshift({cls:'v-book', title:'Pode agendar', desc:'Todos os critérios estão OK. Seguir para Agendamento.'});
+  } else if(lines.length===0 && !allAnswered){
+    el.innerHTML = '<div class="verdict" style="background:transparent;border:1px dashed var(--border-strong);"><div class="vline" style="color:var(--text-faint)">Marque os critérios acima pra ver a recomendação aqui.</div></div>';
+    return;
+  }
+
+  lines.forEach(l=>{
+    const div = document.createElement('div');
+    div.className = 'verdict ' + l.cls;
+    div.innerHTML = `<div class="vline"><b>${escapeHtml(l.title)}</b></div><div class="vline">${escapeHtml(l.desc)}</div>`;
+    el.appendChild(div);
+  });
+}
+
+renderChips();
+renderGrid();
+renderVerdict();
+</script>
+</body>
+</html>
