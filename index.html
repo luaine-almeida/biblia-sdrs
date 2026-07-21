@@ -94,6 +94,16 @@
   .semaphore h2 .dot{width:8px;height:8px;border-radius:50%;background:var(--amber);display:inline-block;}
   .semaphore .desc{color:var(--text-dim);font-size:13px;margin:0 0 14px;}
   .criteria{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:8px;margin-bottom:14px;}
+  .sem-mode-row{display:flex;gap:8px;margin-bottom:16px;}
+  .sem-mode-btn{
+    font-family:'IBM Plex Mono',monospace;font-size:12px;
+    padding:7px 14px;border-radius:20px;
+    border:1px solid var(--border);
+    color:var(--text-dim);background:var(--card);
+    cursor:pointer;transition:.12s;
+  }
+  .sem-mode-btn:hover{border-color:var(--border-strong);color:var(--text);}
+  .sem-mode-btn.active{background:var(--amber);border-color:var(--amber);color:#2a1e08;font-weight:600;}
   .crit{
     border:1px solid var(--border);
     border-radius:8px;
@@ -255,9 +265,42 @@
   .tag-mba{background:#20344a;color:#7fb2e8;}
   .tag-equipe{background:#232c22;color:#9fce6f;}
   .tag-links{background:#232a33;color:#9aa7b5;}
+  .tag-copa{background:#3a2f1a;color:#e8c33d;}
 
   footer{margin-top:36px;padding-top:18px;border-top:1px solid var(--border);color:var(--text-faint);font-size:12.5px;}
   footer a{color:var(--blue);}
+
+  /* Copa dos SDRs — podium & tables */
+  .card.wide{grid-column:1 / -1;}
+  .copa-podium{display:flex;gap:10px;align-items:flex-end;margin:4px 0 18px;}
+  .podium-block{flex:1;text-align:center;border-radius:10px;padding:16px 10px 14px;border:1px solid var(--border);background:var(--panel);}
+  .podium-block.gold{order:2;border-color:#e8c33d;background:#332a15;padding-top:22px;}
+  .podium-block.silver{order:1;border-color:#9aa7b5;background:#20272e;}
+  .podium-block.bronze{order:3;border-color:#c98a4b;background:#2c2013;}
+  .podium-medal{font-size:26px;line-height:1;}
+  .podium-pos{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text-faint);margin-top:4px;}
+  .podium-name{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:14px;margin-top:3px;}
+  .podium-pts{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--text-dim);margin-top:3px;}
+  .podium-flag{font-size:11px;color:var(--amber);margin-top:5px;}
+  .podium-block.pending .podium-name, .podium-block.pending .podium-pts{text-decoration:line-through;opacity:.6;}
+
+  .copa-table-wrap{overflow-x:auto;margin-top:4px;}
+  .copa-table{width:100%;border-collapse:collapse;font-size:13px;min-width:480px;}
+  .copa-table th{
+    background:var(--panel);color:var(--text-dim);text-align:left;padding:8px 10px;
+    font-family:'IBM Plex Mono',monospace;font-size:10.5px;text-transform:uppercase;letter-spacing:.04em;
+    border-bottom:1px solid var(--border-strong);white-space:nowrap;
+  }
+  .copa-table td{padding:8px 10px;border-bottom:1px solid var(--border);color:var(--text);white-space:nowrap;}
+  .copa-table tbody tr:hover td{background:var(--card-hover);}
+  .copa-table .copa-pos{font-family:'IBM Plex Mono',monospace;color:var(--text-dim);}
+  .copa-table tr.copa-pending td{text-decoration:line-through;opacity:.55;}
+  .copa-badge{
+    font-size:11px;font-family:'IBM Plex Mono',monospace;padding:2px 7px;border-radius:10px;
+    background:var(--amber-dim);color:var(--amber);white-space:nowrap;
+  }
+  .copa-note{color:var(--text-faint);font-size:12px;margin-top:10px;}
+  .copa-subtitle{color:var(--text-dim);font-size:13px;margin:-4px 0 4px;}
 
   .empty{color:var(--text-faint);padding:30px 4px;font-size:14px;}
 
@@ -285,7 +328,8 @@
 
   <div class="semaphore">
     <h2><span class="dot"></span>Semáforo de agendamento</h2>
-    <p class="desc">Marque o que já souber sobre o lead. O painel mostra ao vivo se dá pra agendar, contornar objeção, nutrir ou encerrar.</p>
+    <p class="desc">Marque o que já souber sobre o lead. Escolha o programa e o painel mostra ao vivo se dá pra agendar, contornar objeção, nutrir, orientar ou encerrar.</p>
+    <div class="sem-mode-row" id="semModeRow"></div>
     <div class="criteria" id="criteria"></div>
     <div class="verdict-stack" id="verdict"></div>
     <button class="reset-btn" onclick="resetCriteria()">Limpar seleção</button>
@@ -319,6 +363,7 @@ const CATS = [
   {id:'mba', label:'MBA'},
   {id:'equipe', label:'Equipe & Fluxo'},
   {id:'links', label:'Links & Recursos'},
+  {id:'copa', label:'Copa dos SDRs — Julho'},
 ];
 
 const ENTRIES = [
@@ -739,6 +784,20 @@ Além da parte técnica, você conta com mentoria próxima e apoio de carreira p
 
 Você se vê atuando nessa camada mais estratégica com IA?`},
 
+{cat:'mba', title:'Detalhe — MBA IA Aplicada a Negócios', tags:'mba ia aplicada negocios detalhe gestores lideres',
+text:`O MBA em Inteligência Artificial Aplicada a Negócios da TripleTen foi criado para profissionais que querem aprender a usar IA para gerar resultados reais nas empresas, mesmo sem ter experiência em programação.
+
+Ao longo do curso, você aprende a:
+✅ Aplicar IA para aumentar produtividade e automatizar processos;
+✅ Utilizar ferramentas como ChatGPT, Claude e outras soluções de IA no dia a dia;
+✅ Tomar decisões mais estratégicas com base em dados;
+✅ Liderar projetos de transformação digital e inovação;
+✅ Desenvolver projetos práticos que podem ser aplicados imediatamente no seu trabalho.
+
+É um MBA voltado para gestores, líderes, empreendedores e profissionais que querem se destacar em um mercado cada vez mais orientado por inteligência artificial.
+
+Se fizer sentido para você, posso te explicar como funciona a metodologia, o cronograma e as condições atuais. 🚀`},
+
 {cat:'mba', title:'Sobre a consultoria MBA', tags:'mba consultoria convite agendamento',
 text:`Para darmos continuidade, costumamos agendar uma sessão de consultoria estratégica. Nesse bate-papo, apresentamos a estrutura acadêmica, a experiência na plataforma e as métricas de sucesso do programa, além dos planos de investimento reservados para os candidatos selecionados desta turma.
 
@@ -795,6 +854,104 @@ links:[
   {label:'Site em inglês', url:'http://tripleten.com/'},
 ]},
 
+// ===================== COPA DOS SDRS =====================
+{cat:'copa', title:'🏆 Copa TripleTen — Ranking Acumulado (Julho)', tags:'copa ranking julho competicao sdrs leticia joice tayrinne pedro luara isabele', wide:true,
+searchText:'Letícia Brainer Isabele Moraes Tayrinne Borba Joice Ramos Pedro Caetano Luara Lelis ranking acumulado pontos totais acoes bonus auditoria',
+custom:`
+  <div class="copa-subtitle">Pontuação total (ações diárias + bônus semanais) — Julho 2026</div>
+
+  <div class="copa-podium">
+    <div class="podium-block silver">
+      <div class="podium-medal">🥈</div>
+      <div class="podium-pos">2º lugar</div>
+      <div class="podium-name">Joice C. Ramos</div>
+      <div class="podium-pts">123 pts</div>
+      <div class="podium-flag">⚠ auditoria pendente</div>
+    </div>
+    <div class="podium-block gold">
+      <div class="podium-medal">🥇</div>
+      <div class="podium-pos">1º lugar</div>
+      <div class="podium-name">Letícia Brainer</div>
+      <div class="podium-pts">135 pts</div>
+    </div>
+    <div class="podium-block bronze">
+      <div class="podium-medal">🥉</div>
+      <div class="podium-pos">3º lugar</div>
+      <div class="podium-name">Tayrinne F. Borba</div>
+      <div class="podium-pts">111 pts</div>
+    </div>
+  </div>
+
+  <div class="copa-table-wrap">
+  <table class="copa-table">
+    <thead>
+      <tr>
+        <th>Pos.</th><th>SDR</th><th>Pontos totais</th><th>Pontos de ações</th><th>Pontos de bônus</th><th>Status de auditoria</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td class="copa-pos">1</td><td>🥇 Letícia Brainer</td><td>135</td><td>132</td><td>3</td><td>Pendente</td></tr>
+      <tr class="copa-pending"><td class="copa-pos">2</td><td>🥈 Joice C. Ramos</td><td>123</td><td>120</td><td>3</td><td>Pendente</td></tr>
+      <tr><td class="copa-pos">3</td><td>🥉 Tayrinne F. Borba</td><td>111</td><td>108</td><td>3</td><td>Pendente</td></tr>
+      <tr><td class="copa-pos">4</td><td>Pedro Caetano</td><td>98</td><td>95</td><td>0</td><td>Pendente</td></tr>
+      <tr><td class="copa-pos">5</td><td>Luara Lelis</td><td>63</td><td>63</td><td>0</td><td>Pendente</td></tr>
+      <tr><td class="copa-pos">6</td><td>Isabele A. de Moraes</td><td>4</td><td>4</td><td>0</td><td>Pendente</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <div class="copa-note">O 2º lugar (Joice C. Ramos) está com a pontuação riscada na planilha original, indicando auditoria pendente sobre esses pontos — mantido aqui como está até confirmação da supervisão.</div>
+`},
+
+{cat:'copa', title:'Vendas por semana — Copa de Julho', tags:'copa vendas semana 3 4 5 leticia joice tayrinne pedro luara isabele', wide:true,
+searchText:'vendas semana 3 4 5 pontos vendas por SDR',
+custom:`
+  <div class="copa-subtitle">Pontos e nº de vendas por semana, por SDR</div>
+  <div class="copa-table-wrap">
+  <table class="copa-table">
+    <thead>
+      <tr>
+        <th>SDR</th>
+        <th>Semana 3 — pontos</th><th>Semana 3 — vendas</th>
+        <th>Semana 4 — pontos</th><th>Semana 4 — vendas</th>
+        <th>Semana 5 — pontos</th><th>Semana 5 — vendas</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>Letícia Brainer</td><td>72</td><td>2</td><td colspan="2" class="copa-note" style="margin:0;">aguardando dados</td><td colspan="2" class="copa-note" style="margin:0;">aguardando dados</td></tr>
+      <tr class="copa-pending"><td>Joice C. Ramos</td><td>46</td><td>7</td><td colspan="2" class="copa-note" style="margin:0;">aguardando dados</td><td colspan="2" class="copa-note" style="margin:0;">aguardando dados</td></tr>
+      <tr><td>Tayrinne F. Borba</td><td>48</td><td>10</td><td colspan="2" class="copa-note" style="margin:0;">aguardando dados</td><td colspan="2" class="copa-note" style="margin:0;">aguardando dados</td></tr>
+      <tr><td>Pedro Caetano</td><td>32</td><td>1</td><td colspan="2" class="copa-note" style="margin:0;">aguardando dados</td><td colspan="2" class="copa-note" style="margin:0;">aguardando dados</td></tr>
+      <tr><td>Luara Lelis</td><td>35</td><td>2</td><td colspan="2" class="copa-note" style="margin:0;">aguardando dados</td><td colspan="2" class="copa-note" style="margin:0;">aguardando dados</td></tr>
+      <tr><td>Isabele A. de Moraes</td><td>2</td><td>1</td><td colspan="2" class="copa-note" style="margin:0;">aguardando dados</td><td colspan="2" class="copa-note" style="margin:0;">aguardando dados</td></tr>
+    </tbody>
+  </table>
+  </div>
+`},
+
+{cat:'copa', title:'Ranking semanal — destaques', tags:'copa ranking semanal destaque semana 2 semana 3 artilheiro assistente sla campeao', wide:true,
+searchText:'ranking semanal destaque pontos vendas bonus artilheiro assistente sla campeao dias uteis julho',
+custom:`
+  <div class="copa-subtitle">Quem mais pontuou e quem mais vendeu em cada semana, e o top 2 do ranking da semana</div>
+  <div class="copa-table-wrap">
+  <table class="copa-table">
+    <thead>
+      <tr>
+        <th>Semana</th>
+        <th>Destaque em pontos <span class="copa-badge">+3</span></th>
+        <th>Destaque em vendas <span class="copa-badge">+3</span></th>
+        <th>1º no ranking da semana</th>
+        <th>2º no ranking da semana</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>Semana 2</td><td>Joice C. Ramos</td><td>Tayrinne F. Borba</td><td>Joice — 77 pts</td><td>Pedro — 66 pts</td></tr>
+      <tr><td>Semana 3</td><td>Letícia Brainer</td><td>Tayrinne F. Borba</td><td>Letícia — 75 pts</td><td>Tayrinne — 51 pts</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <div class="copa-note">Dias úteis de julho: 23 (segunda a sexta). Bônus semanais (Artilheiro, Assistente, SLA Campeão) calculados automaticamente pela supervisão.</div>
+`},
+
 ];
 
 // ---------- render categories ----------
@@ -821,7 +978,7 @@ function matches(entry){
   const catOk = activeCat==='todos' || entry.cat===activeCat;
   if(!catOk) return false;
   if(!query) return true;
-  const linksText = entry.links ? entry.links.map(l=>l.label+' '+l.url).join(' ') : (entry.text||'');
+  const linksText = entry.links ? entry.links.map(l=>l.label+' '+l.url).join(' ') : (entry.text||entry.searchText||'');
   const hay = (entry.title+' '+entry.tags+' '+linksText).toLowerCase();
   return hay.includes(query.toLowerCase());
 }
@@ -852,12 +1009,15 @@ function renderGrid(){
   }
   items.forEach((entry,i)=>{
     const card = document.createElement('div');
-    card.className = 'card';
+    card.className = 'card' + (entry.wide ? ' wide' : '');
     const noteHtml = entry.note ? `<div class="note">${escapeHtml(entry.note)}</div>` : '';
 
     let bodyHtml, footerHtml;
 
-    if(entry.links){
+    if(entry.custom){
+      bodyHtml = entry.custom;
+      footerHtml = '';
+    } else if(entry.links){
       bodyHtml = `<div class="link-list">` + entry.links.map((l,li) => `
         <div class="link-row">
           <a href="${escapeAttr(l.url)}" target="_blank" rel="noopener">${escapeHtml(l.label)}</a>
@@ -928,7 +1088,7 @@ document.getElementById('search').addEventListener('input', (e)=>{
 });
 
 // ---------- semaphore ----------
-const CRITERIA = [
+const CRITERIA_BOOTCAMP = [
   {key:'pc', label:'Tem computador (não só tablet/celular)'},
   {key:'previsao', label:'Previsão de início menor que 6 meses'},
   {key:'area', label:'Busca pela área de tecnologia'},
@@ -936,49 +1096,111 @@ const CRITERIA = [
   {key:'renda', label:'Tem renda ou apoio financeiro'},
   {key:'idade', label:'Tem 18 anos ou mais'},
 ];
-let state = {};
+
+const CRITERIA_MBA = [
+  {key:'superior', label:'Tem superior completo (graduação, bacharelado ou tecnólogo)'},
+  {key:'mec', label:'Graduação é reconhecida pelo MEC'},
+  {key:'tecnologo_em', label:'É tecnólogo de ensino médio (não de graduação)'},
+  {key:'exterior_revalidado', label:'Se formado no exterior: diploma já revalidado no Brasil'},
+];
+
+const SEM_MODES = [
+  {id:'bootcamp', label:'Bootcamp', criteria:CRITERIA_BOOTCAMP},
+  {id:'mba', label:'MBA', criteria:CRITERIA_MBA},
+];
+
+let semaphoreMode = 'bootcamp';
+let stateBootcamp = {};
+let stateMba = {};
+
+function currentCriteria(){ return semaphoreMode==='mba' ? CRITERIA_MBA : CRITERIA_BOOTCAMP; }
+function currentState(){ return semaphoreMode==='mba' ? stateMba : stateBootcamp; }
+
+const semModeRow = document.getElementById('semModeRow');
+SEM_MODES.forEach(m=>{
+  const btn = document.createElement('button');
+  btn.className = 'sem-mode-btn' + (m.id===semaphoreMode ? ' active' : '');
+  btn.textContent = m.label;
+  btn.dataset.mode = m.id;
+  btn.onclick = ()=>{
+    semaphoreMode = m.id;
+    [...semModeRow.children].forEach(b=>b.classList.toggle('active', b.dataset.mode===semaphoreMode));
+    buildCriteria();
+    renderVerdict();
+  };
+  semModeRow.appendChild(btn);
+});
 
 const critWrap = document.getElementById('criteria');
-CRITERIA.forEach(c=>{
-  const div = document.createElement('div');
-  div.className = 'crit';
-  div.innerHTML = `
-    <div class="label">${c.label}</div>
-    <div class="toggles">
-      <button data-key="${c.key}" data-val="yes">SIM</button>
-      <button data-key="${c.key}" data-val="no">NÃO</button>
-    </div>
-  `;
-  critWrap.appendChild(div);
-});
+
+function buildCriteria(){
+  critWrap.innerHTML = '';
+  currentCriteria().forEach(c=>{
+    const div = document.createElement('div');
+    div.className = 'crit';
+    div.innerHTML = `
+      <div class="label">${c.label}</div>
+      <div class="toggles">
+        <button data-key="${c.key}" data-val="yes">SIM</button>
+        <button data-key="${c.key}" data-val="no">NÃO</button>
+      </div>
+    `;
+    critWrap.appendChild(div);
+  });
+  renderCriteria();
+}
 
 critWrap.addEventListener('click', (e)=>{
   const btn = e.target.closest('button');
   if(!btn) return;
   const key = btn.dataset.key, val = btn.dataset.val;
-  state[key] = (state[key]===val) ? undefined : val;
+  const s = currentState();
+  s[key] = (s[key]===val) ? undefined : val;
   renderCriteria();
   renderVerdict();
 });
 
 function renderCriteria(){
+  const s = currentState();
   [...critWrap.querySelectorAll('button')].forEach(b=>{
     b.classList.remove('active-yes','active-no');
-    if(state[b.dataset.key]===b.dataset.val){
+    if(s[b.dataset.key]===b.dataset.val){
       b.classList.add(b.dataset.val==='yes' ? 'active-yes' : 'active-no');
     }
   });
 }
 
 function resetCriteria(){
-  state = {};
+  if(semaphoreMode==='mba'){ stateMba = {}; } else { stateBootcamp = {}; }
   renderCriteria();
   renderVerdict();
 }
 
 function renderVerdict(){
+  if(semaphoreMode==='mba'){ renderVerdictMba(); } else { renderVerdictBootcamp(); }
+}
+
+function paintVerdict(lines, allAnswered, allGood, bookLine){
   const el = document.getElementById('verdict');
   el.innerHTML = '';
+
+  if(allGood){
+    lines.unshift(bookLine);
+  } else if(lines.length===0 && !allAnswered){
+    el.innerHTML = '<div class="verdict" style="background:transparent;border:1px dashed var(--border-strong);"><div class="vline" style="color:var(--text-faint)">Marque os critérios acima pra ver a recomendação aqui.</div></div>';
+    return;
+  }
+
+  lines.forEach(l=>{
+    const div = document.createElement('div');
+    div.className = 'verdict ' + l.cls;
+    div.innerHTML = `<div class="vline"><b>${escapeHtml(l.title)}</b></div><div class="vline">${escapeHtml(l.desc)}</div>`;
+    el.appendChild(div);
+  });
+}
+
+function renderVerdictBootcamp(){
+  const state = stateBootcamp;
   const lines = [];
 
   if(state.pc==='no'){
@@ -997,24 +1219,38 @@ function renderVerdict(){
     lines.push({cls:'v-warn', title:'Validar situação financeira', desc:'Usar script em Dúvidas & Objeções → "Desempregado / sem renda" antes de prosseguir com o agendamento.'});
   }
 
-  const allAnswered = CRITERIA.every(c=>state[c.key]);
-  const allGood = CRITERIA.every(c=>state[c.key]==='yes');
+  const allAnswered = CRITERIA_BOOTCAMP.every(c=>state[c.key]);
+  const allGood = CRITERIA_BOOTCAMP.every(c=>state[c.key]==='yes');
 
-  if(allGood){
-    lines.unshift({cls:'v-book', title:'Pode agendar', desc:'Todos os critérios estão OK. Seguir para Agendamento.'});
-  } else if(lines.length===0 && !allAnswered){
-    el.innerHTML = '<div class="verdict" style="background:transparent;border:1px dashed var(--border-strong);"><div class="vline" style="color:var(--text-faint)">Marque os critérios acima pra ver a recomendação aqui.</div></div>';
-    return;
-  }
-
-  lines.forEach(l=>{
-    const div = document.createElement('div');
-    div.className = 'verdict ' + l.cls;
-    div.innerHTML = `<div class="vline"><b>${escapeHtml(l.title)}</b></div><div class="vline">${escapeHtml(l.desc)}</div>`;
-    el.appendChild(div);
-  });
+  paintVerdict(lines, allAnswered, allGood, {cls:'v-book', title:'Pode agendar', desc:'Todos os critérios estão OK. Seguir para Agendamento.'});
 }
 
+function renderVerdictMba(){
+  const state = stateMba;
+  const lines = [];
+
+  if(state.superior==='no'){
+    lines.push({cls:'v-block', title:'Não elegível para o MBA agora', desc:'Sem superior completo, o lead não pode seguir com o MBA. Apresentar os bootcamps como alternativa — eles não exigem graduação (ver script em MBA → "Requisitos do MBA").'});
+  }
+  if(state.mec==='no'){
+    lines.push({cls:'v-block', title:'Graduação não reconhecida pelo MEC', desc:'Graduação sem reconhecimento do MEC não conta para o MBA. Apresentar os bootcamps como alternativa.'});
+  }
+  if(state.tecnologo_em==='yes'){
+    lines.push({cls:'v-block', title:'Tecnólogo de ensino médio não conta', desc:'Esse tipo de tecnólogo não tem validade de graduação para o MBA. Apresentar os bootcamps como alternativa.'});
+  }
+  if(state.exterior_revalidado==='no'){
+    lines.push({cls:'v-warn', title:'Orientar revalidação de diploma', desc:'Usar script em MBA → "Revalidação de diploma" antes de seguir com o agendamento.'});
+  }
+
+  const allAnswered = CRITERIA_MBA.every(c=>state[c.key]);
+  const allGood = state.superior==='yes' && state.mec==='yes'
+    && (state.tecnologo_em==='no' || state.tecnologo_em===undefined)
+    && (state.exterior_revalidado==='yes' || state.exterior_revalidado===undefined);
+
+  paintVerdict(lines, allAnswered, allGood, {cls:'v-book', title:'Pode seguir com a qualificação do MBA', desc:'Critérios de elegibilidade OK. Seguir para Qualificação MBA.'});
+}
+
+buildCriteria();
 renderChips();
 renderGrid();
 renderVerdict();
